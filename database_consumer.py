@@ -4,14 +4,14 @@ import pg8000.dbapi
 from confluent_kafka import Consumer, KafkaError
 import time
 
-# config kafka
+# Configuration Kafka
 KAFKA_CONF = {
     'bootstrap.servers': 'localhost:9092',
     'group.id': 'db-group',
     'auto.offset.reset': 'earliest'
 }
 
-#configuration postgres
+# Configuration Postgres
 PG_CONF = {
     "host": "127.0.0.1",
     "port": 5433,
@@ -21,7 +21,7 @@ PG_CONF = {
 }
 
 def init_db():
-    """initialise la table dans Postgres"""
+    """Initialise la table dans Postgres"""
     try:
         conn = pg8000.dbapi.connect(**PG_CONF)
         cur = conn.cursor()
@@ -38,26 +38,26 @@ def init_db():
         conn.commit()
         cur.close()
         conn.close()
-        print("table 'transactions' prête.")
+        print("Table 'transactions' prête.")
     except Exception as e:
         print(f"Erreur DB: {e}")
         raise e
 
 def main():
-    #attente de la disponibilité de la db
-    print("tentative de connexion à la base de données...")
+    # Attente de la disponibilité de la DB
+    print("Tentative de connexion à la base de données...")
     for i in range(10):
         try:
             init_db()
             break
         except Exception:
-            print(f"base de donnees non prete, nouvel essai dans 2s... ({i+1}/10)")
+            print(f"Base de données non prête, nouvel essai dans 2s... ({i+1}/10)")
             time.sleep(2)
     
     consumer = Consumer(KAFKA_CONF)
     consumer.subscribe(['events'])
 
-    print("demarrage du consommateur db...")
+    print("Démarrage du consommateur DB...")
 
     conn = None
     try:
@@ -76,16 +76,17 @@ def main():
                     print(msg.error())
                     break
 
-            #traitement du message
+            # Traitement du message
             data = json.loads(msg.value().decode('utf-8'))
             
-            # logique métier : on recupere le statut genere par le producer
+            # Logique métier : on récupère le statut généré par le producer
+            # Si le message est ancien et n'a pas de statut, on le recalcule pour éviter les faux négatifs
             if 'status' in data:
                 status = data['status']
             else:
                 status = 'FRAUD' if data.get('amount', 0) > 3000 else 'LEGIT'
             
-            # insertion en base
+            # Insertion en base
             cur.execute("""
                 INSERT INTO transactions (transaction_id, amount, currency, status, timestamp)
                 VALUES (%s, %s, %s, %s, to_timestamp(%s))

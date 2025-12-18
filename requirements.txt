@@ -1,0 +1,8 @@
+confluent-kafka
+fastapi
+uvicorn
+aiokafka
+websockets
+pg8000
+pandas
+apache-flink==1.17.0

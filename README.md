@@ -1,69 +1,36 @@
-# KafkaDemo — Quick Start
+# Open Data 
 
-Minimal instructions to run the real-time transaction dashboard with Kafka, FastAPI, and a static HTML frontend.
+## Pré 
+- Docker
+- Docker Compose
+- Python 3.9 - 3.10
 
-## Prerequisites
-- Docker + Docker Compose
-- Python 3.11+
-- OS: Windows, Linux, or macOS
+## Installation
 
-## 1) Start Infrastructure
+### Télécharger les jars hadoop
+
+Télécharger les jars: https://www.swisstransfer.com/d/e47247eb-3a1e-4022-b29f-1f1f2640ca55
+Décompresser les ``jars`` dans un dossier jars à la racine du projet.
+
+### Lancer le docker
+
+Lancer le docker compose via le script start.sh qui initialise les services Docker et lance le job Flink.
 ```bash
-docker-compose up -d
+./start.sh
 ```
 
-## 2) Create and Activate Virtualenv
-```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux/macOS
-source venv/bin/activate
-```
+### Lancer le producer de données
 
-## 3) Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-## 4) Start Backend (WebSocket + Serves Front)
-Choose based on OS.
-```bash
-# Windows
-uvicorn consumer_backend_windows:app --host 0.0.0.0 --port 8000 --reload
-
-# Linux/macOS
-uvicorn consumer_backend_linux:app --host 0.0.0.0 --port 8000 --reload
-```
-
-- WebSocket endpoint: `ws://localhost:8000/ws`
-- Frontend served at: `http://localhost:8000/`
-
-## 5) Start Producer
+Lancer le producer de données via le script producer.py.
 ```bash
 python producer.py
 ```
 
-## Configuration
-- Topic: `events`
-- Kafka bootstrap: `localhost:9092`
-- Frontend connects dynamically to `${location.host}` for WebSocket
+### Lancer l'API backend
 
-## Troubleshooting (Essentials)
-- Port 8000 in use
-  - Windows: `netstat -ano | findstr :8000` then `taskkill /PID <PID> /F`
-  - Linux/macOS: `lsof -ti:8000 | xargs kill -9`
-- No data on dashboard
-  - Ensure producer is running
-  - Check backend logs for Kafka errors
-  - Verify Docker services: `docker-compose ps`
-- WebSocket failure
-  - Reload the page (Ctrl+F5)
-  - Confirm backend is reachable at `http://localhost:8000/`
+Lancer l'application Flask via le script consumer_backend.py.
+```bash
+python consumer_backend.py
+```
 
-## Files
-- `producer.py`: generates transactions (LEGIT/FRAUD)
-- `consumer_backend_windows.py` / `consumer_backend_linux.py`: WebSocket server
-- `index.html`: dashboard UI (Chart.js, logs, distribution, time-window)
-- `docker-compose.yml`: Kafka, Zookeeper, Postgres
-- `requirements.txt`: Python dependencies
+Accéder à l'API backend via l'URL http://localhost:8000.

@@ -1,13 +1,21 @@
 import asyncio
 import json
 from fastapi import FastAPI, WebSocket
+from fastapi.responses import FileResponse
 from aiokafka import AIOKafkaConsumer
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 app = FastAPI()
 
 KAFKA_TOPIC = "events"
 KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
+
+app.mount("/static", StaticFiles(directory="web/static"), name="static")
+
+@app.get("/")
+async def get():
+    return FileResponse("web/index.html")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -24,8 +32,9 @@ async def websocket_endpoint(websocket: WebSocket):
         async for msg in consumer:
             data = json.loads(msg.value.decode('utf-8'))
             
-            #logique de detection de fraude
-            #on fait confiance au producer qui a genere la donnee
+            # LOGIQUE DE DÉTECTION DE FRAUDE
+            # On fait confiance au producer qui a généré la donnée
+            # Si le champ status est manquant (vieux messages), on le recalcule
             if 'status' not in data:
                 data['status'] = 'FRAUD' if data['amount'] > 3000 else 'LEGIT'
 
