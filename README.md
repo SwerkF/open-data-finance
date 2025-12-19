@@ -7,9 +7,13 @@
 
 ## Installation
 
+### Changer le formatage de submit_flink_job.sh
+
+Changer le fichier de `CRLF` vers `LF` car possible crash au lancement du job Flink.
+
 ### Télécharger les jars hadoop
 
-Télécharger les jars: https://www.swisstransfer.com/d/e47247eb-3a1e-4022-b29f-1f1f2640ca55
+Télécharger les jars: https://www.swisstransfer.com/d/1759d19c-516c-4682-826a-1346c75aea10
 Décompresser les ``jars`` dans un dossier jars à la racine du projet.
 
 ### Lancer le docker
